@@ -1,0 +1,1 @@
+COMMANDS_INIT = "# Commands module"

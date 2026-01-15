@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us - Mystique{% endblock %}
+
+{% block content %}
+<style>
+    .about-section {
+        padding: 3rem 0;
+    }
+    .about-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+    }
+    .about-text h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    .about-text h2 {
+        color: #8B7355;
+        margin-bottom: 1rem;
+    }
+    .about-image {
+        width: 100%;
+        border-radius: 10px;
+    }
+    .cta-button {
+        background: #8B7355;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 25px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 1rem;
+    }
+</style>
+
+<section class="about-section container">
+    <div class="about-content">
+        <div class="about-text">
+            <h1>About</h1>
+            <h2>Your Look</h2>
+            <p>Discover the essence of ethnic fashion as Mystique. Unleash your style with vibrant hues and exquisite designs, embrace tradition and modernity in a kaleidoscope of elegance. Step into our virtual realm and ignite your inner fashion ista. Elevate your wardrobe with captivating ethnic wear that celebrates ethnicity.</p>
+            <button class="cta-button">SEE MORE</button>
+        </div>
+        <div>
+            <img src="{% static 'images/about.jpg' %}" alt="Fashion" class="about-image">
+            <h1 style="text-align: right; font-size: 4rem; color: rgba(0,0,0,0.1); margin-top: -2rem;">fashion</h1>
+        </div>
+    </div>
+</section>
+{% endblock %}

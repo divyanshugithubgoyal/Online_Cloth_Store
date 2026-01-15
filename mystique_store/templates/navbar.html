@@ -1,0 +1,533 @@
+<header>
+    <div class="container">
+        <nav>
+            <a href="{% url 'core:home' %}" class="logo">
+                🏠 Mystique
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="{% url 'core:home' %}">Home</a></li>
+                <li><a href="{% url 'products:product_list' %}">Product</a></li>
+                <li><a href="#" class="category-dropdown-toggle">Category ▼</a>
+                    <ul class="category-dropdown">
+                        <li><a href="{% url 'products:product_list' %}?category=KIDS_FEMALE">Kids Female</a></li>
+                        <li><a href="{% url 'products:product_list' %}?category=KIDS_MALE">Kids Male</a></li>
+                        <li><a href="{% url 'products:product_list' %}?category=MEN">Men</a></li>
+                        <li><a href="{% url 'products:product_list' %}?category=WOMEN">Women</a></li>
+                        <li><a href="{% url 'products:product_list' %}?category=FOOTWEAR">Footwear</a></li>
+                    </ul>
+                </li>
+                <li><a href="{% url 'core:contact' %}">Contact</a></li>
+            </ul>
+            
+            <div class="nav-right">
+                {% if user.is_authenticated %}
+                    <span class="user-greeting">Hello, {{ user.username }}</span>
+                    <a href="{% url 'authentication:logout' %}" class="nav-button">Logout</a>
+                {% else %}
+                    <a href="{% url 'authentication:register' %}" class="nav-button">Register</a>
+                    <a href="{% url 'authentication:login' %}" class="nav-button signin-btn">Sign in</a>
+                {% endif %}
+                
+                <a href="{% url 'cart:cart' %}" class="cart-icon">
+                    🛒
+                    {% if cart_count > 0 %}
+                    <span class="cart-count">{{ cart_count }}</span>
+                    {% endif %}
+                </a>
+                
+                <button onclick="openSearchModal()" class="search-btn" title="Search Products">🔍</button>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<!-- SEARCH MODAL -->
+<div id="searchModal" class="search-modal">
+    <div class="search-modal-content">
+        <button class="search-close-btn" onclick="closeSearchModal()">&times;</button>
+        
+        <h2 class="search-title">Search Your Items Here...</h2>
+        
+        <form action="{% url 'products:product_list' %}" method="get" class="search-form">
+            <div class="search-input-wrapper">
+                <input 
+                    type="text" 
+                    name="q" 
+                    placeholder="Enter product name or category" 
+                    class="search-input"
+                    id="searchInput"
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" class="search-submit-btn">
+                    🔍 Search
+                </button>
+            </div>
+        </form>
+        
+        <!-- Live Search Results -->
+        <div id="liveSearchResults" class="live-search-results"></div>
+        
+        <!-- Quick Search Suggestions -->
+        <div class="search-suggestions">
+            <h3>Popular Searches:</h3>
+            <div class="suggestion-tags">
+                <a href="{% url 'products:product_list' %}?q=frock" class="suggestion-tag">Frock</a>
+                <a href="{% url 'products:product_list' %}?q=dress" class="suggestion-tag">Dress</a>
+                <a href="{% url 'products:product_list' %}?q=kaftan" class="suggestion-tag">Kaftan</a>
+                <a href="{% url 'products:product_list' %}?q=suit" class="suggestion-tag">Suit</a>
+                <a href="{% url 'products:product_list' %}?q=saree" class="suggestion-tag">Saree</a>
+                <a href="{% url 'products:product_list' %}?q=shoes" class="suggestion-tag">Shoes</a>
+            </div>
+        </div>
+        
+        <!-- Browse by Category -->
+        <div class="search-categories">
+            <h3>Browse by Category:</h3>
+            <div class="category-grid">
+                <a href="{% url 'products:product_list' %}?category=KIDS_FEMALE" class="category-card-small">
+                    <span class="category-icon">👗</span>
+                    <span>Kids Female</span>
+                </a>
+                <a href="{% url 'products:product_list' %}?category=KIDS_MALE" class="category-card-small">
+                    <span class="category-icon">👔</span>
+                    <span>Kids Male</span>
+                </a>
+                <a href="{% url 'products:product_list' %}?category=MEN" class="category-card-small">
+                    <span class="category-icon">🕴️</span>
+                    <span>Men</span>
+                </a>
+                <a href="{% url 'products:product_list' %}?category=WOMEN" class="category-card-small">
+                    <span class="category-icon">👘</span>
+                    <span>Women</span>
+                </a>
+                <a href="{% url 'products:product_list' %}?category=FOOTWEAR" class="category-card-small">
+                    <span class="category-icon">👟</span>
+                    <span>Footwear</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Navigation Styles */
+    header {
+        background: white;
+        padding: 1rem 0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .logo {
+        display: flex;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-decoration: none;
+        color: #8B7355;
+    }
+    .nav-links {
+        display: flex;
+        list-style: none;
+        gap: 2rem;
+        margin: 0;
+        padding: 0;
+    }
+    .nav-links a {
+        text-decoration: none;
+        color: #666;
+        transition: color 0.3s;
+        font-weight: 500;
+    }
+    .nav-links a:hover {
+        color: #8B7355;
+    }
+    
+    /* Category Dropdown */
+    .nav-links li {
+        position: relative;
+    }
+    .category-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        list-style: none;
+        padding: 0.5rem 0;
+        margin: 0;
+        min-width: 150px;
+        border-radius: 5px;
+        z-index: 100;
+    }
+    .category-dropdown li {
+        padding: 0;
+    }
+    .category-dropdown li a {
+        display: block;
+        padding: 0.7rem 1.5rem;
+        color: #666;
+        white-space: nowrap;
+    }
+    .category-dropdown li a:hover {
+        background: #f8f9fa;
+        color: #8B7355;
+    }
+    .nav-links li:hover .category-dropdown {
+        display: block;
+    }
+    
+    /* Nav Right */
+    .nav-right {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    .nav-button {
+        text-decoration: none !important;
+        color: #666 !important;
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
+        border: 2px solid #ddd;
+        transition: all 0.3s;
+        font-weight: 600;
+        background: white;
+    }
+    .nav-button:hover {
+        background: #8B7355;
+        color: white !important;
+        border-color: #8B7355;
+    }
+    .signin-btn {
+        background: #8B7355 !important;
+        color: white !important;
+        border-color: #8B7355;
+    }
+    .signin-btn:hover {
+        background: #6D4C41 !important;
+        border-color: #6D4C41;
+    }
+    .user-greeting {
+        color: #666;
+        font-weight: 500;
+    }
+    .cart-icon {
+        position: relative;
+        font-size: 1.5rem;
+        text-decoration: none;
+    }
+    .cart-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #8B7355;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.7rem;
+    }
+    .search-btn {
+        background: none;
+        border: none;
+        font-size: 1.3rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        transition: transform 0.2s;
+    }
+    .search-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    /* SEARCH MODAL STYLES */
+    .search-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s;
+    }
+    .search-modal.active {
+        display: flex;
+    }
+    .search-modal-content {
+        background: white;
+        padding: 3rem;
+        border-radius: 15px;
+        max-width: 700px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        animation: slideDown 0.3s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes slideDown {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    .search-close-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        color: #999;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        transition: all 0.3s;
+    }
+    .search-close-btn:hover {
+        background: #f0f0f0;
+        color: #333;
+    }
+    .search-title {
+        text-align: center;
+        color: #333;
+        margin-bottom: 2rem;
+        font-size: 1.8rem;
+    }
+    .search-form {
+        margin-bottom: 2rem;
+    }
+    .search-input-wrapper {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .search-input {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border: 2px solid #ddd;
+        border-radius: 50px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+    .search-input:focus {
+        border-color: #8B7355;
+    }
+    .search-submit-btn {
+        padding: 1rem 2rem;
+        background: #8B7355;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.3s;
+        white-space: nowrap;
+    }
+    .search-submit-btn:hover {
+        background: #6D4C41;
+    }
+    
+    /* Live Search Results */
+    .live-search-results {
+        margin-top: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .search-result-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        text-decoration: none;
+        color: #333;
+        transition: background 0.2s;
+    }
+    .search-result-item:hover {
+        background: #f8f9fa;
+    }
+    .search-result-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 5px;
+        margin-right: 1rem;
+    }
+    .search-result-info {
+        flex: 1;
+    }
+    .search-result-name {
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+    }
+    .search-result-price {
+        color: #8B7355;
+        font-weight: 600;
+    }
+    
+    /* Search Suggestions */
+    .search-suggestions {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f0f0f0;
+    }
+    .search-suggestions h3 {
+        color: #666;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    .suggestion-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .suggestion-tag {
+        padding: 0.5rem 1rem;
+        background: #f0f0f0;
+        color: #666;
+        text-decoration: none;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+    .suggestion-tag:hover {
+        background: #8B7355;
+        color: white;
+    }
+    
+    /* Browse Categories */
+    .search-categories {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f0f0f0;
+    }
+    .search-categories h3 {
+        color: #666;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+    .category-card-small {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.3s;
+    }
+    .category-card-small:hover {
+        background: #8B7355;
+        color: white;
+        transform: translateY(-3px);
+    }
+    .category-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .nav-links {
+            display: none;
+        }
+        .search-modal-content {
+            padding: 2rem 1.5rem;
+        }
+        .category-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<script>
+// Search Modal Functions
+function openSearchModal() {
+    const modal = document.getElementById('searchModal');
+    modal.classList.add('active');
+    document.getElementById('searchInput').focus();
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSearchModal() {
+    const modal = document.getElementById('searchModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('searchModal');
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeSearchModal();
+        }
+    });
+    
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSearchModal();
+        }
+    });
+    
+    // Live Search Functionality
+    const searchInput = document.getElementById('searchInput');
+    const liveResults = document.getElementById('liveSearchResults');
+    
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        if (query.length > 2) {
+            // Make AJAX request for live search
+            fetch(`/products/search-api/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayLiveResults(data.products);
+                })
+                .catch(error => {
+                    console.log('Search error:', error);
+                });
+        } else {
+            liveResults.innerHTML = '';
+        }
+    });
+});
+
+function displayLiveResults(products) {
+    const liveResults = document.getElementById('liveSearchResults');
+    
+    if (products.length === 0) {
+        liveResults.innerHTML = '<p style="text-align: center; color: #999; padding: 1rem;">No products found</p>';
+        return;
+    }
+    
+    liveResults.innerHTML = products.map(product => `
+        <a href="/products/${product.slug}/" class="search-result-item">
+            <img src="${product.image}" alt="${product.name}" class="search-result-image">
+            <div class="search-result-info">
+                <div class="search-result-name">${product.name}</div>
+                <div class="search-result-price">$${product.price}</div>
+            </div>
+        </a>
+    `).join('');
+}
+</script>

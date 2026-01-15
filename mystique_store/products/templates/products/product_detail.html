@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - Mystique{% endblock %}
+
+{% block content %}
+<style>
+    .product-detail {
+        padding: 3rem 0;
+    }
+    .product-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+    }
+    .product-image-large {
+        width: 100%;
+        border-radius: 10px;
+    }
+    .product-details h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    .product-price-large {
+        font-size: 2rem;
+        color: #8B7355;
+        margin-bottom: 1rem;
+    }
+    .stock-status {
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+    .in-stock { background: #d4edda; color: #155724; }
+    .out-of-stock { background: #f8d7da; color: #721c24; }
+    .add-to-cart-form {
+        margin: 2rem 0;
+    }
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    .quantity-selector input {
+        width: 60px;
+        padding: 0.5rem;
+        text-align: center;
+    }
+    .add-to-cart-btn {
+        width: 100%;
+        padding: 1rem;
+        background: #8B7355;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.1rem;
+    }
+    .related-products {
+        margin-top: 3rem;
+    }
+</style>
+
+<section class="product-detail container">
+    <div class="product-container">
+        <div>
+            <div style="position: relative;">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image-large">
+                <span class="product-badge">{{ product.category.get_name_display }}</span>
+            </div>
+        </div>
+        
+        <div class="product-details">
+            <h1>{{ product.name }}</h1>
+            <p class="product-price-large">₹{{ product.price }}</p>
+            
+            <span class="stock-status {% if product.is_in_stock %}in-stock{% else %}out-of-stock{% endif %}">
+                {{ product.get_stock_status_display }}
+            </span>
+            
+            {% if product.available_sizes %}
+            <p><strong>Size Available:</strong> {{ product.available_sizes }}</p>
+            {% endif %}
+            
+            <p><strong>Category:</strong> {{ product.category.get_name_display }}</p>
+            
+            {% if product.description %}
+            <div style="margin: 1.5rem 0;">
+                <h3>Description</h3>
+                <p>{{ product.description }}</p>
+            </div>
+            {% else %}
+            <p style="margin: 1.5rem 0;">N/A</p>
+            {% endif %}
+            
+            {% if product.is_in_stock %}
+            <form method="post" action="{% url 'cart:add_to_cart' product.id %}" class="add-to-cart-form">
+                {% csrf_token %}
+                <div class="quantity-selector">
+                    <label>Quantity:</label>
+                    <input type="number" name="quantity" value="1" min="1" max="10">
+                </div>
+                <button type="submit" class="add-to-cart-btn">ADD TO CART</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if related_products %}
+    <div class="related-products">
+        <h2 class="section-title">Related Products</h2>
+        <div class="products-grid">
+            {% for product in related_products %}
+            <div class="product-card">
+                <div style="position: relative;">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                    <span class="product-badge">{{ product.stock_status }}</span>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">{{ product.name }}</h3>
+                    <p class="product-price">₹{{ product.price }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

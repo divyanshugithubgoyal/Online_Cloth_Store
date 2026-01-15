@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.get_name_display }} - Mystique{% endblock %}
+
+{% block content %}
+<style>
+    .category-section {
+        padding: 3rem 0;
+    }
+    .category-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .category-header h1 {
+        font-size: 2.5rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    .category-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    .category-description {
+        max-width: 800px;
+        margin: 0 auto 2rem;
+        text-align: center;
+        color: #666;
+    }
+    .products-count {
+        text-align: center;
+        color: #8B7355;
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+    .product-card {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+    .product-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+    }
+    .product-info {
+        padding: 1.5rem;
+    }
+    .product-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: black;
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+    .product-name {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 600;
+    }
+    .product-price {
+        font-size: 1.4rem;
+        color: #8B7355;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    .view-details-btn {
+        width: 100%;
+        padding: 0.8rem;
+        background: #8B7355;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s;
+    }
+    .view-details-btn:hover {
+        background: #6D4C41;
+    }
+    .stock-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+    .in-stock {
+        background: #d4edda;
+        color: #155724;
+    }
+    .out-of-stock {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 3rem;
+    }
+    .pagination a, .pagination span {
+        padding: 0.6rem 1.2rem;
+        border: 1px solid #ddd;
+        text-decoration: none;
+        color: #333;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+    .pagination a:hover {
+        background: #8B7355;
+        color: white;
+        border-color: #8B7355;
+    }
+    .pagination .current {
+        background: #8B7355;
+        color: white;
+        border-color: #8B7355;
+    }
+    .no-products {
+        text-align: center;
+        padding: 5rem 0;
+    }
+    .no-products-icon {
+        font-size: 5rem;
+        color: #ddd;
+        margin-bottom: 1rem;
+    }
+    .back-link {
+        display: inline-block;
+        margin-bottom: 2rem;
+        color: #8B7355;
+        text-decoration: none;
+        font-size: 1rem;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<section class="category-section container">
+    <a href="{% url 'products:product_list' %}" class="back-link">← Back to All Products</a>
+    
+    <div class="category-header">
+        <h1>{{ category.get_name_display }}</h1>
+        {% if category.description %}
+        <div class="category-description">
+            <p>{{ category.description }}</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="products-count">
+        <strong>{{ products.paginator.count }}</strong> Products Found
+    </div>
+    
+    {% if products %}
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <div style="position: relative;">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                <span class="product-badge">{{ product.category.get_name_display }}</span>
+            </div>
+            <div class="product-info">
+                <span class="stock-badge {% if product.is_in_stock %}in-stock{% else %}out-of-stock{% endif %}">
+                    {{ product.get_stock_status_display }}
+                </span>
+                <h3 class="product-name">{{ product.name }}</h3>
+                <p class="product-price">₹{{ product.price }}</p>
+                <a href="{% url 'products:product_detail' product.slug %}" style="text-decoration: none;">
+                    <button class="view-details-btn">View Details</button>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if products.has_other_pages %}
+    <div class="pagination">
+        {% if products.has_previous %}
+        <a href="?page=1">&laquo; First</a>
+        <a href="?page={{ products.previous_page_number }}">Previous</a>
+        {% endif %}
+        
+        <span class="current">Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+        
+        {% if products.has_next %}
+        <a href="?page={{ products.next_page_number }}">Next</a>
+        <a href="?page={{ products.paginator.num_pages }}">Last &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="no-products">
+        <div class="no-products-icon">📦</div>
+        <h2>No Products Found</h2>
+        <p>There are no products available in this category at the moment.</p>
+        <a href="{% url 'products:product_list' %}">
+            <button class="view-details-btn" style="max-width: 300px; margin-top: 2rem;">Browse All Products</button>
+        </a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if search_query %}Search Results for "{{ search_query }}"{% else %}Products{% endif %} - Mystique
+{% endblock %}
+
+{% block content %}
+<style>
+    .products-section {
+        padding: 2rem 0;
+    }
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .page-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    .search-info {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    .search-info strong {
+        color: #8B7355;
+    }
+    .filter-section {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    .filter-btn {
+        padding: 0.7rem 2rem;
+        border: 2px solid #ddd;
+        background: white;
+        cursor: pointer;
+        border-radius: 25px;
+        transition: all 0.3s;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: #666;
+    }
+    .filter-btn:hover, .filter-btn.active {
+        background: #8B7355;
+        color: white;
+        border-color: #8B7355;
+    }
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+    .product-card {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+    .product-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+    }
+    .product-info {
+        padding: 1.5rem;
+    }
+    .product-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: black;
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+    .product-name {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    .product-price {
+        font-size: 1.4rem;
+        color: #8B7355;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    .view-btn {
+        width: 100%;
+        padding: 0.8rem;
+        background: #8B7355;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+    .view-btn:hover {
+        background: #6D4C41;
+    }
+    .no-results {
+        text-align: center;
+        padding: 3rem;
+        grid-column: 1/-1;
+    }
+    .no-results-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 3rem;
+    }
+    .pagination a, .pagination span {
+        padding: 0.6rem 1.2rem;
+        border: 1px solid #ddd;
+        text-decoration: none;
+        color: #333;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+    .pagination a:hover {
+        background: #8B7355;
+        color: white;
+        border-color: #8B7355;
+    }
+    .pagination .current {
+        background: #8B7355;
+        color: white;
+        border-color: #8B7355;
+    }
+</style>
+
+<section class="products-section container">
+    <div class="page-header">
+        {% if search_query %}
+            <h1>Search Results</h1>
+        {% else %}
+            <h1>Our Products</h1>
+        {% endif %}
+    </div>
+    
+    {% if search_query %}
+    <div class="search-info">
+        Showing results for: <strong>"{{ search_query }}"</strong> 
+        ({{ products.paginator.count }} product{% if products.paginator.count != 1 %}s{% endif %} found)
+        <br>
+        <a href="{% url 'products:product_list' %}" style="color: #8B7355; margin-top: 0.5rem; display: inline-block;">← View All Products</a>
+    </div>
+    {% else %}
+    <p style="text-align: center; margin-bottom: 2rem;">{{ products.paginator.count }} Products Available</p>
+    {% endif %}
+    
+    <!-- Category Filter Buttons -->
+    {% if not search_query %}
+    <div class="filter-section">
+        <a href="{% url 'products:product_list' %}" class="filter-btn {% if not current_category %}active{% endif %}">
+            All Products
+        </a>
+        <a href="{% url 'products:product_list' %}?category=KIDS_FEMALE" class="filter-btn {% if current_category == 'KIDS_FEMALE' %}active{% endif %}">
+            Kids Female
+        </a>
+        <a href="{% url 'products:product_list' %}?category=KIDS_MALE" class="filter-btn {% if current_category == 'KIDS_MALE' %}active{% endif %}">
+            Kids Male
+        </a>
+        <a href="{% url 'products:product_list' %}?category=MEN" class="filter-btn {% if current_category == 'MEN' %}active{% endif %}">
+            Men
+        </a>
+        <a href="{% url 'products:product_list' %}?category=WOMEN" class="filter-btn {% if current_category == 'WOMEN' %}active{% endif %}">
+            Women
+        </a>
+        <a href="{% url 'products:product_list' %}?category=FOOTWEAR" class="filter-btn {% if current_category == 'FOOTWEAR' %}active{% endif %}">
+            Footwear
+        </a>
+    </div>
+    {% endif %}
+    
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <div style="position: relative;">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                <span class="product-badge">{{ product.category.get_name_display }}</span>
+            </div>
+            <div class="product-info">
+                <h3 class="product-name">{{ product.name }}</h3>
+                <p class="product-price">₹{{ product.price }}</p>
+                <a href="{% url 'products:product_detail' product.slug %}" class="view-btn">
+                    View Details
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-results">
+            <div class="no-results-icon">🔍</div>
+            <h2>No Products Found</h2>
+            <p>Sorry, we couldn't find any products matching your search.</p>
+            <a href="{% url 'products:product_list' %}">
+                <button class="view-btn" style="max-width: 300px; margin: 2rem auto;">View All Products</button>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if products.has_other_pages %}
+    <div class="pagination">
+        {% if products.has_previous %}
+        <a href="?page=1{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">&laquo; First</a>
+        <a href="?page={{ products.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">Previous</a>
+        {% endif %}
+        
+        <span class="current">Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+        
+        {% if products.has_next %}
+        <a href="?page={{ products.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">Next</a>
+        <a href="?page={{ products.paginator.num_pages }}{% if current_category %}&category={{ current_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">Last &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
