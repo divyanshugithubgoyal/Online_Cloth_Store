@@ -7,7 +7,7 @@ from .models import profile
 
 @login_required(login_url='login')
 def home(request):
-    courses = profile.objects.all()[:4]   
+    courses = profile.objects.all() 
     return render(request, 'index.html', {
         'courses': courses
     })

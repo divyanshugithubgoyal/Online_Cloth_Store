@@ -8,8 +8,8 @@ from django.utils.text import slugify
 class Category(models.Model):
     CATEGORY_CHOICES = [
         ('ALL', 'All'),
-        ('KIDS_FEMALE', 'Kids Female'),
-        ('KIDS_MALE', 'Kids Male'),
+        ('KIDS_FEMALE', 'Girls'),
+        ('KIDS_MALE', 'Boys'),
         ('MEN', 'Men'),
         ('WOMEN', 'Women'),
         ('FOOTWEAR', 'Footwear'),
